@@ -1,0 +1,57 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function Admin() {
+    const [withdrawals, setWithdrawals] = useState([]);
+
+    const fetchData = async () => {
+        const res = await axios.get("http://localhost:5000/admin/withdrawals", {
+            headers: {
+                "admin-key": "BETFITY_ADMIN_2026"
+            }
+        });
+
+        setWithdrawals(res.data);
+    };
+
+    const approve = async (id) => {
+        await axios.post(
+            "http://localhost:5000/admin/withdraw/approve",
+            { id },
+            { headers: { "admin-key": "BETFITY_ADMIN_2026" } }
+        );
+
+        fetchData();
+    };
+
+    const reject = async (id) => {
+        await axios.post(
+            "http://localhost:5000/admin/withdraw/reject",
+            { id },
+            { headers: { "admin-key": "BETFITY_ADMIN_2026" } }
+        );
+
+        fetchData();
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    return (
+        <div style={{ textAlign: "center" }}>
+            <h1>🛠 Betfity Admin Dashboard</h1>
+
+            {withdrawals.map((w) => (
+                <div key={w.id} style={{ margin: 10 }}>
+                    <p>
+                        User: {w.userId} | Amount: {w.amount} | Status: {w.status}
+                    </p>
+
+                    <button onClick={() => approve(w.id)}>✅ Approve</button>
+                    <button onClick={() => reject(w.id)}>❌ Reject</button>
+                </div>
+            ))}
+        </div>
+    );
+}
