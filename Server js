@@ -1,0 +1,71 @@
+const express = require("express");
+const http = require("http");
+const cors = require("cors");
+const { Server } = require("socket.io");
+
+const { register, login } = require("./src/users");
+const { generateToken, verifyToken } = require("./src/auth");
+const { runCrashGame } = require("./src/games/crash");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
+
+/* ======================
+   AUTH ROUTES
+====================== */
+
+app.post("/register", (req, res) => {
+    const { username, password } = req.body;
+    const result = register(username, password);
+    res.json(result);
+});
+
+app.post("/login", (req, res) => {
+    const { username, password } = req.body;
+
+    const result = login(username, password);
+    if (result.error) return res.json(result);
+
+    const token = generateToken(result.user);
+
+    res.json({
+        success: true,
+        token
+    });
+});
+
+/* ======================
+   PROTECTED ROUTE EXAMPLE
+====================== */
+
+app.get("/profile", (req, res) => {
+    const token = req.headers.authorization;
+
+    const decoded = verifyToken(token);
+    if (!decoded) return res.json({ error: "Unauthorized" });
+
+    res.json({
+        message: "Protected data",
+        user: decoded
+    });
+});
+
+/* ======================
+   SOCKET GAME
+====================== */
+
+io.on("connection", (socket) => {
+    console.log("User connected");
+
+    socket.on("start_game", () => {
+        runCrashGame(io);
+    });
+});
+
+server.listen(5000, () => {
+    console.log("BETFITY AUTH SERVER RUNNING");
+});
