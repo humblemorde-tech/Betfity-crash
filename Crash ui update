@@ -1,0 +1,15 @@
+const placeBet = () => {
+    socket.emit("bet:place", {
+        roundId: currentRound,
+        userId: "john",
+        amount: 50
+    });
+};
+
+const cashOut = () => {
+    socket.emit("bet:cashout", {
+        roundId: currentRound,
+        userId: "john",
+        multiplier
+    });
+};
