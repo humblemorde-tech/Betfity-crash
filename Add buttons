@@ -1,0 +1,2 @@
+<button onClick={placeBet}>💰 Place Bet (50)</button>
+<button onClick={cashOut}>💸 Cash Out</button>
