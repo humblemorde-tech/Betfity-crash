@@ -1,0 +1,31 @@
+const { getWithdrawals } = require("./withdrawals");
+
+let users = {};
+
+function createUser(id) {
+    users[id] = { balance: 1000 };
+}
+
+function withdrawRequest(id, amount) {
+    if (users[id].balance < amount) {
+        return { error: "Insufficient balance" };
+    }
+
+    users[id].balance -= amount;
+
+    return {
+        success: true,
+        message: "Withdrawal request sent (pending admin approval)"
+    };
+}
+
+function addWinnings(id, amount) {
+    users[id].balance += amount;
+}
+
+module.exports = {
+    createUser,
+    withdrawRequest,
+    addWinnings,
+    users
+};
