@@ -1,0 +1,57 @@
+const { placeBetDeduct, addWinnings } = require("../wallet");
+const { placeBet, cashOut, getRoundBets } = require("../bets");
+
+let currentRound = 0;
+
+function generateCrashPoint() {
+    return Math.max(1, (Math.random() ** 2) * 30);
+}
+
+function runCrashGame(io) {
+    currentRound++;
+    const roundId = currentRound;
+
+    let multiplier = 1.0;
+    let crashPoint = generateCrashPoint();
+
+    io.emit("round:start", { roundId });
+
+    const interval = setInterval(() => {
+        multiplier += 0.05;
+
+        io.emit("round:update", {
+            roundId,
+            multiplier: multiplier.toFixed(2)
+        });
+
+        if (multiplier >= crashPoint) {
+            clearInterval(interval);
+
+            const bets = getRoundBets(roundId);
+
+            // settle all bets
+            for (let userId in bets) {
+                const bet = bets[userId];
+
+                if (bet.cashedOut) {
+                    const win = bet.amount * bet.cashoutMultiplier;
+                    addWinnings(userId, win);
+
+                    io.emit("player:win", {
+                        userId,
+                        win
+                    });
+                } else {
+                    io.emit("player:lose", { userId });
+                }
+            }
+
+            io.emit("round:crash", {
+                roundId,
+                crashPoint: crashPoint.toFixed(2)
+            });
+        }
+    }, 100);
+}
+
+module.exports = { runCrashGame };
