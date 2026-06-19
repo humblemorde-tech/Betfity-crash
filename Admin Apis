@@ -1,0 +1,18 @@
+// Get all withdrawals
+app.get("/admin/withdrawals", (req, res) => {
+    res.json(getWithdrawals());
+});
+
+// Approve withdrawal
+app.post("/admin/withdraw/approve", (req, res) => {
+    const { id } = req.body;
+    const result = approveWithdrawal(id);
+    res.json(result);
+});
+
+// Reject withdrawal
+app.post("/admin/withdraw/reject", (req, res) => {
+    const { id } = req.body;
+    const result = rejectWithdrawal(id);
+    res.json(result);
+});
