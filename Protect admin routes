@@ -1,0 +1,11 @@
+const { isAdmin } = require("./src/auth");
+
+app.use("/admin", (req, res, next) => {
+    const key = req.headers["admin-key"];
+
+    if (!isAdmin(key)) {
+        return res.json({ error: "Unauthorized admin" });
+    }
+
+    next();
+});
