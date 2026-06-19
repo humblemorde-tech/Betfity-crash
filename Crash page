@@ -1,0 +1,31 @@
+import React, { useEffect, useState } from "react";
+import socket from "../socket";
+
+export default function Crash() {
+    const [multiplier, setMultiplier] = useState(1);
+    const [crash, setCrash] = useState(null);
+
+    useEffect(() => {
+        socket.on("game:update", (data) => {
+            setMultiplier(data.multiplier);
+        });
+
+        socket.on("game:crash", (data) => {
+            setCrash(data.crashPoint);
+        });
+    }, []);
+
+    return (
+        <div style={{ textAlign: "center", marginTop: 40 }}>
+            <h1>💥 BETFITY CRASH</h1>
+
+            <h2 style={{ fontSize: 50 }}>{multiplier}x</h2>
+
+            <button onClick={() => socket.emit("start_game")}>
+                Start Game
+            </button>
+
+            {crash && <h3>💀 Crashed at {crash}x</h3>}
+        </div>
+    );
+}
